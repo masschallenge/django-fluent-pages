@@ -73,6 +73,14 @@ class UrlNodeQuerySet(PolymorphicMPTTQuerySet, DecoratingQuerySet):
             )
 
 
+    def published_for_user(self, user):
+        qs = self.published()
+        if not (user.is_staff or user.is_superuser):
+            qs = qs.filter(Q(published_for__isnull=True) |
+                           Q(published_for__in=user.groups.all()))
+        return qs
+
+
     def in_navigation(self):
         """
         Return only pages in the navigation.
@@ -80,11 +88,19 @@ class UrlNodeQuerySet(PolymorphicMPTTQuerySet, DecoratingQuerySet):
         return self.published().filter(in_navigation=True)
 
 
+    def in_navigation_for_user(self, user):
+        return self.published_for_user(user).filter(in_navigation=True)
+
+
     def toplevel(self):
         """
         Return all pages which have no parent.
         """
         return self.filter(parent__isnull=True)
+
+
+    def toplevel_for_user(self, user):
+        return self.published_for_user(user).filter(parent__isnull=True)
 
 
     def _mark_current(self, current_page):
@@ -135,11 +151,19 @@ class UrlNodeManager(PolymorphicMPTTModelManager):
         return self.get_query_set().published()
 
 
+    def published_for_user(self, user):
+        return self.get_query_set().published_for_user(user)
+
+
     def in_navigation(self):
         """
         Return only pages in the navigation.
         """
         return self.get_query_set().in_navigation()
+
+
+    def in_navigation_for_user(self, user):
+        return self.get_query_set().in_navigation_for_user(user)
 
 
     def toplevel(self):
@@ -149,6 +173,10 @@ class UrlNodeManager(PolymorphicMPTTModelManager):
         return self.get_query_set().toplevel()
 
 
+    def toplevel_for_user(self, user):
+        return self.get_query_set().toplevel_for_user(user)
+
+
     def toplevel_navigation(self, current_page=None):
         """
         Return all toplevel items, ordered by menu ordering.
@@ -156,4 +184,9 @@ class UrlNodeManager(PolymorphicMPTTModelManager):
         When current_page is passed, the object values such as 'is_current' will be set. 
         """
         items = self.toplevel().in_navigation().non_polymorphic()._mark_current(current_page)
+        return items
+
+
+    def toplevel_navigation_for_user(self, user, current_page=None):
+        items = self.toplevel_for_user(user).in_navigation().non_polymorphic()._mark_current(current_page)
         return items
