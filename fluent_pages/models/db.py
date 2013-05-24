@@ -65,6 +65,7 @@ class UrlNode(PolymorphicMPTTModel):
 
     title = models.CharField(_('title'), max_length=255)
     slug = models.SlugField(_('slug'), help_text=_("The slug is used in the URL of the page"))
+    icon = models.CharField(_('icon'), max_length=32, blank=True, null=True, choices=(('home', 'Home'), ('file', 'File'), ('list', 'List'), ('calendar', 'Calendar')))
     parent = PageTreeForeignKey('self', blank=True, null=True, related_name='children', verbose_name=_('parent'), help_text=_('You can also change the parent by dragging the page in the list.'))
     parent_site = models.ForeignKey(Site, editable=False, default=_get_current_site)
     #children = a RelatedManager by 'parent'
