@@ -13,6 +13,7 @@ from django.core.cache import cache
 from django.core.exceptions import ImproperlyConfigured
 from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib.sites.models import Site
+from django.contrib.auth.models import Group
 from django.db import models
 from django.db.transaction import commit_on_success
 from django.utils.translation import ugettext_lazy as _
@@ -70,6 +71,7 @@ class UrlNode(PolymorphicMPTTModel):
 
     # Publication information
     status = models.CharField(_('status'), max_length=1, choices=STATUSES, default=DRAFT, db_index=True)
+    published_for = models.ForeignKey(Group, blank=True, null=True, help_text=_('Select a group to which this page will be published.  Users outside this group will not be able to see this page.  If left blank, all users will be able to view the page.'))
     publication_date = models.DateTimeField(_('publication date'), null=True, blank=True, db_index=True, help_text=_('''When the page should go live, status must be "Published".'''))
     publication_end_date = models.DateTimeField(_('publication end date'), null=True, blank=True, db_index=True)
     in_navigation = models.BooleanField(_('show in navigation'), default=True, db_index=True)
