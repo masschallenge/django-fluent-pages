@@ -84,7 +84,7 @@ class UrlNodeAdmin(PolymorphicMPTTChildModelAdmin):
     # Expose fieldsets for subclasses to reuse
     #: The general fieldset to display
     FIELDSET_GENERAL = (None, {
-        'fields': ('title', 'slug', 'status', 'published_for', 'in_navigation'),
+        'fields': ('title', 'slug', 'icon', 'status', 'published_for', 'in_navigation'),
     })
     #: The menu fieldset
     FIELDSET_MENU = (_('Menu structure'), {

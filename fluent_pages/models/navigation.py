@@ -80,6 +80,7 @@ class PageNavigationNode(NavigationNode):
     title = property(lambda self: self._page.title)
     url = property(lambda self: self._page.url)
     level = property(lambda self: self._page.level)
+    icon = property(lambda self: self._page.icon)
 
     @property
     def is_active(self):
