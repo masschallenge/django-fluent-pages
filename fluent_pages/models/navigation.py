@@ -107,3 +107,6 @@ class PageNavigationNode(NavigationNode):
         if not self._children and (self._page.get_level() + 1) < self._max_depth:  # level 0 = toplevel.
             #children = self._page.get_children()  # Via MPTT
             self._children = self._page.children.in_navigation()._mark_current(self._current_page)  # Via RelatedManager
+
+    def get_page(self):
+        return self._page
