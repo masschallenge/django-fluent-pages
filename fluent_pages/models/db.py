@@ -72,7 +72,7 @@ class UrlNode(PolymorphicMPTTModel):
 
     # Publication information
     status = models.CharField(_('status'), max_length=1, choices=STATUSES, default=DRAFT, db_index=True)
-    published_for = models.ForeignKey(Group, blank=True, null=True, help_text=_('Select a group to which this page will be published.  Users outside this group will not be able to see this page.  If left blank, all users will be able to view the page.'))
+    published_for = models.ManyToManyField("mc.ProgramRole", related_name="program_roles", blank=True, null=True, help_text=_('Select a role or roles to which this page will be published.  Users without this role will not be able to see this page.  If left blank, all users will be able to view the page.'))
     publication_date = models.DateTimeField(_('publication date'), null=True, blank=True, db_index=True, help_text=_('''When the page should go live, status must be "Published".'''))
     publication_end_date = models.DateTimeField(_('publication end date'), null=True, blank=True, db_index=True)
     in_navigation = models.BooleanField(_('show in navigation'), default=True, db_index=True)
@@ -366,7 +366,6 @@ class UrlNode(PolymorphicMPTTModel):
         ]
         for cachekey in cachekeys:
             cache.delete(cachekey)
-
 
 
 class Page(UrlNode):

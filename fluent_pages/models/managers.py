@@ -74,10 +74,26 @@ class UrlNodeQuerySet(PolymorphicMPTTQuerySet, DecoratingQuerySet):
 
 
     def published_for_user(self, user):
+        from mc.models import ProgramRoleGrant
+
+        def intersection(roles, published_for):
+            approved_roles = published_for.all()
+            result = False
+            if not approved_roles:
+                result = True
+            else:
+                for role in approved_roles:
+                    if role in roles:
+                        result = True
+                        break
+            return result
+
         qs = self.published()
         if not (user.is_staff or user.is_superuser):
-            qs = qs.filter(Q(published_for__isnull=True) |
-                           Q(published_for__in=user.groups.all()))
+            user_grants = ProgramRoleGrant.objects.filter(person=user)
+            roles = [grant.program_role for grant in user_grants]
+            result_ids = [r.id for r in qs if intersection(roles, r.published_for)]
+            qs = self.published().filter(id__in=result_ids)
         return qs
 
 
@@ -188,5 +204,5 @@ class UrlNodeManager(PolymorphicMPTTModelManager):
 
 
     def toplevel_navigation_for_user(self, user, current_page=None):
-        items = self.toplevel_for_user(user).in_navigation().non_polymorphic()._mark_current(current_page)
+        items = self.toplevel_for_user(user).in_navigation_for_user(user).non_polymorphic()._mark_current(current_page)
         return items

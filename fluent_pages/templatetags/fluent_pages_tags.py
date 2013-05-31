@@ -108,7 +108,7 @@ class MenuNode(BaseInclusionNode):
             'parent': parent_context,
             'request': request,
             'menu_items': [
-                PageNavigationNode(page, current_page=current_page, **node_kwargs) for page in top_pages
+                PageNavigationNode(page, current_page=current_page, user=user, **node_kwargs) for page in top_pages
             ]
         }
 

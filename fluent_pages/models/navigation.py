@@ -59,7 +59,7 @@ class PageNavigationNode(NavigationNode):
     An implementation of the :class:`NavigationNode` for :class:`~fluent_pages.models.Page` models.
     """
 
-    def __init__(self, page, parent_node=None, max_depth=9999, current_page=None):
+    def __init__(self, page, parent_node=None, max_depth=9999, current_page=None, user=None):
         """
         Initialize the node with a Page.
         """
@@ -70,6 +70,7 @@ class PageNavigationNode(NavigationNode):
         self._parent_node = parent_node
         self._children = []
         self._max_depth = max_depth
+        self._user = user
 
         # Depths starts relative to the first level.
         if not parent_node:
@@ -106,7 +107,10 @@ class PageNavigationNode(NavigationNode):
     def _read_children(self):
         if not self._children and (self._page.get_level() + 1) < self._max_depth:  # level 0 = toplevel.
             #children = self._page.get_children()  # Via MPTT
-            self._children = self._page.children.in_navigation()._mark_current(self._current_page)  # Via RelatedManager
+            if self._user is None:
+                self._children = self._page.children.in_navigation()._mark_current(self._current_page)  # Via RelatedManager
+            else:
+                self._children = self._page.children.in_navigation_for_user(self._user)._mark_current(self._current_page)  # Via RelatedManager
 
     def get_page(self):
         return self._page
