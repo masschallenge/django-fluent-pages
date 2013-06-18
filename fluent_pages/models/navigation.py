@@ -9,6 +9,8 @@ It offers properties such as :attr:`~fluent_pages.models.Page.parent`
 and :attr:`~fluent_pages.models.Page.children` (a :class:`~django.db.models.RelatedManager`),
 and methods such as `get_parent()` and `get_children()` through the `MPTTModel` base class.
 """
+from fluent_pages.appsettings import AUTHZ_BACKEND as backend
+
 
 
 class NavigationNode(object):
@@ -107,10 +109,11 @@ class PageNavigationNode(NavigationNode):
     def _read_children(self):
         if not self._children and (self._page.get_level() + 1) < self._max_depth:  # level 0 = toplevel.
             #children = self._page.get_children()  # Via MPTT
-            if self._user is None:
-                self._children = self._page.children.in_navigation()._mark_current(self._current_page)  # Via RelatedManager
-            else:
-                self._children = self._page.children.in_navigation_for_user(self._user)._mark_current(self._current_page)  # Via RelatedManager
+            children = self._page.children.in_navigation()
+            children = children._mark_current(self._current_page)
+            if self._user is not None:
+                children = children.filter(pk__in=backend.pages_for_user(self._user))
+            self._children = children
 
     def get_page(self):
         return self._page

@@ -84,7 +84,7 @@ class UrlNodeAdmin(PolymorphicMPTTChildModelAdmin):
     # Expose fieldsets for subclasses to reuse
     #: The general fieldset to display
     FIELDSET_GENERAL = (None, {
-        'fields': ('title', 'slug', 'icon', 'status', 'published_for', 'in_navigation'),
+        'fields': ('title', 'slug', 'icon', 'status', 'in_navigation'),
     })
     #: The menu fieldset
     FIELDSET_MENU = (_('Menu structure'), {
@@ -121,9 +121,9 @@ class UrlNodeAdmin(PolymorphicMPTTChildModelAdmin):
             obj.author = request.user
         obj.save()
 
-    def formfield_for_foreignkey(self, db_field, request, **kwargs):
-        if db_field.name == 'published_for':
-            kwargs['empty_label'] = u"Everyone"
-        return super(UrlNodeAdmin, self).formfield_for_foreignkey(db_field,
-                                                                  request,
-                                                                  **kwargs)
+    # def formfield_for_foreignkey(self, db_field, request, **kwargs):
+    #     if db_field.name == 'published_for':
+    #         kwargs['empty_label'] = u"Everyone"
+    #     return super(UrlNodeAdmin, self).formfield_for_foreignkey(db_field,
+    #                                                               request,
+    #                                                               **kwargs)

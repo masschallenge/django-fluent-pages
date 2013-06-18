@@ -11,4 +11,3 @@ class SimpleBackend(object):
             all_pks = tuple(UrlNode.objects.values_list('pk', flat=True))
             user_obj._fluent_pages_node_cache = all_pks
         return user_obj._fluent_pages_node_cache
-        

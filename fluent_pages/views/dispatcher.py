@@ -1,13 +1,16 @@
 """
 The view to display CMS content.
 """
+import re
+
 from django.conf import settings
 from django.core.urlresolvers import Resolver404, reverse, resolve, NoReverseMatch
 from django.http import Http404, HttpResponseRedirect
 from django.views.generic.base import View
-from fluent_pages.models import UrlNode
 from django.views.generic import RedirectView
-import re
+
+from fluent_pages.appsettings import AUTHZ_BACKEND as backend
+from fluent_pages.models import UrlNode
 
 
 # NOTE:
@@ -73,7 +76,8 @@ class CmsPageDispatcher(GetPathMixin, View):
         Return the QuerySet used to find the pages.
         """
         # This can be limited or expanded in the future
-        return self.model.objects.published_for_user(self.request.user)
+        return self.model.objects.filter(
+            pk__in=backend.pages_for_user(self.user))
 
 
     def get_object(self, path=None):

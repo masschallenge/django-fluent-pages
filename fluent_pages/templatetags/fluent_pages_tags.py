@@ -8,10 +8,13 @@ Load this module using:
 """
 from django.contrib.sites.models import Site
 from django.template import Library, TemplateSyntaxError
-from fluent_pages.models import UrlNode, Page
-from fluent_pages.models.navigation import PageNavigationNode
+
 from tag_parser import template_tag
 from tag_parser.basetags import BaseInclusionNode, BaseNode
+
+from fluent_pages.appsettings import AUTHZ_BACKEND as backend
+from fluent_pages.models import UrlNode
+from fluent_pages.models.navigation import PageNavigationNode
 
 register = Library()
 
@@ -84,23 +87,34 @@ class MenuNode(BaseInclusionNode):
             parent_value = tag_kwargs['parent']
 
             if isinstance(parent_value, basestring):
-                # if we've been provided a string then we lookup based on the path/url
+                # if we've been provided a string then we lookup based on the
+                # path/url
                 try:
-                    parent = UrlNode.objects.get_for_path(parent_value)
+                    parent = UrlNode.objects.filter(
+                        pk__in=backend.pages_for_user(user)).get_for_path(
+                            parent_value)
                 except UrlNode.DoesNotExist:
                     return {'menu_items': []}
-                top_pages = parent.children.in_navigation_for_user(user)  # Can't do parent___cached_key due to polymorphic queryset code.
+                # Can't do parent___cached_key due to polymorphic queryset code.
+                top_pages = parent.children.in_navigation().filter(
+                    pk__in=backend.pages_for_user(user))
             elif isinstance(parent_value, (int, long)):
-                # If we've been provided an int then we lookup based on the id of the page
-                top_pages = UrlNode.objects.in_navigation_for_user(user).filter(parent_id=parent_value)
+                # If we've been provided an int then we lookup based on the id
+                # of the page
+                top_pages = UrlNode.objects.in_navigation().filter(
+                    pk__in=backend.pages_for_user(user), parent_id=parent_value)
             elif isinstance(parent_value, UrlNode):
-                # If we've been given a Page or UrlNode then there's no lookup necessary
-                top_pages = parent_value.children.in_navigation_for_user(user)
+                # If we've been given a Page or UrlNode then there's no lookup
+                # necessary
+                top_pages = parent_value.children.in_navigation().filter(
+                    pk__in=backend.pages_for_user(user))
             else:
                 raise TemplateSyntaxError("The 'render_menu' tag only allows an URL path, page id or page object for the 'parent' keyword")
         else:
             # otherwise get the top level nav for the current page
-            top_pages = UrlNode.objects.toplevel_navigation_for_user(user, current_page=current_page)
+            top_pages = UrlNode.objects.toplevel_navigation(
+                current_page=current_page).filter(
+                    pk__in=backend.pages_for_user(user))
 
         # Construct a PageNavigationNode for every page, that allows simple iteration of the tree.
         node_kwargs = get_node_kwargs(tag_kwargs)
