@@ -76,8 +76,8 @@ class CmsPageDispatcher(GetPathMixin, View):
         Return the QuerySet used to find the pages.
         """
         # This can be limited or expanded in the future
-        return self.model.objects.filter(
-            pk__in=backend.pages_for_user(self.user))
+        user = self.request.user
+        return self.model.objects.filter(pk__in=backend.pages_for_user(user))
 
 
     def get_object(self, path=None):
