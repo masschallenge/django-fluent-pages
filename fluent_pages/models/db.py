@@ -15,7 +15,12 @@ from django.core.urlresolvers import reverse, NoReverseMatch
 from django.contrib.sites.models import Site
 from django.contrib.auth.models import Group
 from django.db import models
-from django.db.transaction import commit_on_success
+from django.db import transaction
+# django 1.6, 1.5 and 1.4 supports
+try:
+    commit_on_success = transaction.atomic
+except AttributeError:
+    commit_on_success = transaction.commit_on_success
 from django.utils.translation import ugettext_lazy as _
 from polymorphic_tree.models import PolymorphicMPTTModel, PolymorphicMPTTModelBase
 from fluent_pages.models.fields import TemplateFilePathField, PageTreeForeignKey
