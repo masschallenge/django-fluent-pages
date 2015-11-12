@@ -16,10 +16,10 @@ from django.contrib.sites.models import Site
 from django.contrib.auth.models import Group
 from django.db import models
 from django.db import transaction
-# django 1.6, 1.5 and 1.4 supports
 try:
     commit_on_success = transaction.atomic
 except AttributeError:
+    # django 1.6, 1.5 and 1.4 supports
     commit_on_success = transaction.commit_on_success
 from django.utils.translation import ugettext_lazy as _
 from polymorphic_tree.models import PolymorphicMPTTModel, PolymorphicMPTTModelBase
